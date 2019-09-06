@@ -295,15 +295,6 @@ CONSUMER:
 					msgs <- msg
 				}
 
-				if msg.Topic == "persistent://tc8jyxa7ypw3qgvewkrx/internal/event-partition-0" ||
-					msg.Topic == "persistent://tc8jyxa7ypw3qgvewkrx/internal/event-partition-4" ||
-					msg.Topic == "persistent://tc8jyxa7ypw3qgvewkrx/internal/event-partition-10" ||
-					msg.Topic == "persistent://hmmsj2r89m3w9ihmjh56/internal/event-partition-0" ||
-					msg.Topic == "persistent://hmmsj2r89m3w9ihmjh56/internal/event-partition-4" ||
-					msg.Topic == "persistent://hmmsj2r89m3w9ihmjh56/internal/event-partition-10" {
-					log.Printf("msg receivedSinceFlow:%d ,topic:%s\n", receivedSinceFlow, msg.Topic)
-				}
-
 				if receivedSinceFlow++; receivedSinceFlow >= highwater {
 					if err := consumer.Flow(receivedSinceFlow); err != nil {
 						m.asyncErrs.Send(err)
