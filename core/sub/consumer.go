@@ -18,10 +18,10 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/TuyaInc/pulsar-client-go/core/frame"
 	"github.com/TuyaInc/pulsar-client-go/core/msg"
 	"github.com/TuyaInc/pulsar-client-go/pkg/api"
+	"github.com/golang/protobuf/proto"
 )
 
 // maxRedeliverUnacknowledged is the maxiMum number of
@@ -35,14 +35,15 @@ const maxRedeliverUnacknowledged = 1000
 // all messages the consumer receives.
 func newConsumer(s frame.CmdSender, dispatcher *frame.Dispatcher, topic string, reqID *msg.MonotonicID, ConsumerID uint64, queue chan msg.Message) *Consumer {
 	return &Consumer{
-		S:           s,
-		Topic:       topic,
-		ConsumerID:  ConsumerID,
-		ReqID:       reqID,
-		Dispatcher:  dispatcher,
-		Queue:       queue,
-		Closedc:     make(chan struct{}),
-		EndOfTopicc: make(chan struct{}),
+		S:              s,
+		Topic:          topic,
+		ConsumerID:     ConsumerID,
+		ReqID:          reqID,
+		Dispatcher:     dispatcher,
+		Queue:          queue,
+		Closedc:        make(chan struct{}),
+		EndOfTopicc:    make(chan struct{}),
+		OverflowSignal: make(chan struct{}),
 	}
 }
 
@@ -58,8 +59,9 @@ type Consumer struct {
 
 	Queue chan msg.Message
 
-	Omu      sync.Mutex           // protects following
-	Overflow []*api.MessageIdData // IDs of messages that were dropped because of full buffer
+	Omu            sync.Mutex           // protects following
+	Overflow       []*api.MessageIdData // IDs of messages that were dropped because of full buffer
+	OverflowSignal chan struct{}
 
 	Mu           sync.Mutex // protects following
 	IsClosed     bool
@@ -332,6 +334,7 @@ func (c *Consumer) HandleMessage(f frame.Frame) error {
 			c.Overflow = append(c.Overflow, newMid)
 		}
 		c.Omu.Unlock()
+		c.OverflowSignal <- struct{}{}
 
 		return fmt.Errorf("consumer message queue on topic %q is full (capacity = %d)", c.Topic, cap(c.Queue))
 	}

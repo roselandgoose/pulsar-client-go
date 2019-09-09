@@ -212,6 +212,9 @@ func (m *ManagedConsumer) Receive(ctx context.Context) (msg.Message, error) {
 		case msg := <-m.queue:
 			return msg, nil
 
+		case <-consumer.OverflowSignal:
+			return msg.Message{}, errors.New("consumer overflow")
+
 		case <-ctx.Done():
 			return msg.Message{}, ctx.Err()
 
@@ -306,6 +309,9 @@ CONSUMER:
 
 			case <-ctx.Done():
 				return ctx.Err()
+
+			case <-consumer.OverflowSignal:
+				receivedSinceFlow++
 
 			case <-consumer.Closed():
 				m.asyncErrs.Send(errors.New("consumer closed"))
