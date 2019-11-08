@@ -16,12 +16,12 @@ package manage
 import (
 	"context"
 	"errors"
-	"log"
 	"sync"
 	"time"
 
 	"github.com/TuyaInc/pulsar-client-go/core/msg"
 	"github.com/TuyaInc/pulsar-client-go/core/sub"
+	"github.com/TuyaInc/pulsar-client-go/pkg/log"
 	"github.com/TuyaInc/pulsar-client-go/utils"
 )
 
@@ -147,13 +147,13 @@ func (m *ManagedConsumer) ConsumerID(ctx context.Context) uint64 {
 				// Re-enter read-lock to obtain it.
 				continue
 			case <-ctx.Done():
-				log.Printf("get ConsumerID timeout faild(retry time:%d), topic:%s\n", i, m.cfg.Topic)
+				log.Warnf("get ConsumerID timeout faild(retry time:%d), topic:%s\n", i, m.cfg.Topic)
 				return 0
 			}
 		}
 		return consumer.ConsumerID
 	}
-	log.Printf("get ConsumerID faild(retry time:%d), topic:%s\n", retry, m.cfg.Topic)
+	log.Warnf("get ConsumerID faild(retry time:%d), topic:%s\n", retry, m.cfg.Topic)
 	return 0
 }
 
@@ -291,9 +291,9 @@ CONSUMER:
 			select {
 			case msg := <-m.queue:
 				if len(msgs) == cap(msgs) {
-					log.Printf("msg queue blocking,topic:%s\n", msg.Topic)
+					log.Debugf("msg queue blocking,topic:%s\n", msg.Topic)
 					msgs <- msg
-					log.Printf("msg queue un-blocking ,topic:%s\n", msg.Topic)
+					log.Debugf("msg queue un-blocking ,topic:%s\n", msg.Topic)
 				} else {
 					msgs <- msg
 				}
@@ -401,7 +401,7 @@ func (m *ManagedConsumer) reconnect(initial bool) *sub.Consumer {
 
 		ctx, cancel := context.WithTimeout(context.Background(), m.cfg.NewConsumerTimeout)
 		if !reconnectFlag {
-			log.Printf("reconnecting consumer topic:%v\n", m.cfg.Topic)
+			log.Debugf("reconnecting consumer topic:%v\n", m.cfg.Topic)
 		}
 		newConsumer, err := m.newConsumer(ctx)
 		cancel()
@@ -410,7 +410,7 @@ func (m *ManagedConsumer) reconnect(initial bool) *sub.Consumer {
 			continue
 		}
 		if !reconnectFlag {
-			log.Printf("reconnect consumer sucess, topic:%v\n", m.cfg.Topic)
+			log.Debugf("reconnect consumer sucess, topic:%v\n", m.cfg.Topic)
 		}
 
 		return newConsumer
