@@ -30,7 +30,7 @@ import (
 // NewServer returns a ready-to-use Pulsar test server.
 // The server will be closed when the context is canceled.
 func NewServer(ctx context.Context) (*Server, error) {
-	l, err := net.ListenTCP("tcp4", &net.TCPAddr{
+	l, err := net.ListenTCP("tcp", &net.TCPAddr{
 		IP:   net.IPv4zero,
 		Port: 0, // Let the OS pick a random free port
 	})

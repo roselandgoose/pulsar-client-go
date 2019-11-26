@@ -27,7 +27,7 @@ type MockPulsarServer struct {
 }
 
 func NewMockPulsarServer(ctx context.Context) (*MockPulsarServer, error) {
-	l, err := net.ListenTCP("tcp4", &net.TCPAddr{
+	l, err := net.ListenTCP("tcp", &net.TCPAddr{
 		IP:   net.IPv4zero,
 		Port: 0,
 	})
