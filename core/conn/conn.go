@@ -36,7 +36,7 @@ func NewTCPConn(addr string, timeout time.Duration) (*Conn, error) {
 		DualStack: false,
 		Timeout:   timeout,
 	}
-	c, err := d.Dial("tcp4", addr)
+	c, err := d.Dial("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func NewTLSConn(addr string, tlsCfg *tls.Config, timeout time.Duration) (*Conn, 
 		DualStack: false,
 		Timeout:   timeout,
 	}
-	c, err := tls.DialWithDialer(&d, "tcp4", addr, tlsCfg)
+	c, err := tls.DialWithDialer(&d, "tcp", addr, tlsCfg)
 	if err != nil {
 		return nil, err
 	}
