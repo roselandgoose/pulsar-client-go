@@ -20,10 +20,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/TuyaInc/pulsar-client-go/core/frame"
 	"github.com/TuyaInc/pulsar-client-go/core/msg"
 	"github.com/TuyaInc/pulsar-client-go/pkg/api"
+	"github.com/golang/protobuf/proto"
 )
 
 func TestConsumer_Flow(t *testing.T) {
@@ -159,6 +159,13 @@ func TestConsumer_handleMessage_fullQueue(t *testing.T) {
 	queueSize := 3
 	c := newConsumer(&ms, dispatcher, "test", &reqID, consID, make(chan msg.Message, queueSize))
 
+	var receivedSinceFlow int
+	go func() {
+		for range c.OverflowSignal {
+			receivedSinceFlow++
+		}
+	}()
+
 	f := frame.Frame{
 		BaseCmd: &api.BaseCommand{
 			Type: api.BaseCommand_MESSAGE.Enum(),
@@ -193,6 +200,10 @@ func TestConsumer_handleMessage_fullQueue(t *testing.T) {
 
 	if got, expected := len(c.Overflow), 1; got != expected {
 		t.Fatalf("len(consumer overflow buffer) = %d; expected %d", got, expected)
+	}
+
+	if got, expected := receivedSinceFlow, 1; got != expected {
+		t.Fatalf("receivedSinceFlow = %d; expected %d", got, expected)
 	}
 
 	for i := 0; i < queueSize; i++ {
@@ -297,6 +308,13 @@ func TestConsumer_RedeliverOverflow(t *testing.T) {
 	queueSize := 1
 	N := 8 // number of msg.Messages to push to consumer
 	c := newConsumer(&ms, dispatcher, "test", &reqID, consID, make(chan msg.Message, queueSize))
+
+	var receivedSinceFlow int
+	go func() {
+		for range c.OverflowSignal {
+			receivedSinceFlow++
+		}
+	}()
 
 	for i := 0; i < N; i++ {
 		entryID := uint64(i)

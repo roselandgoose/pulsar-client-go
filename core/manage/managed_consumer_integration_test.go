@@ -50,6 +50,7 @@ func TestManagedConsumer_Int_ReceiveAsync(t *testing.T) {
 		Name:         utils.RandString(8),
 		Topic:        topic,
 		QueueSize:    128,
+		SubMode:      SubscriptionModeFailover,
 	}
 	mc := NewManagedConsumer(cp, consumerCfg)
 	go func() {
