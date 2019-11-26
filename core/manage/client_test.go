@@ -28,7 +28,6 @@ import (
 	"github.com/TuyaInc/pulsar-client-go/utils"
 )
 
-
 // TestClient_Int_PubSub creates a producer and multiple consumers.
 // Messages are created by the producer, and then it is asserted
 // that all the consumers receive those messages.
@@ -431,6 +430,10 @@ func TestClient_Int_RedeliverOverflow(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	go func() {
+		for range cs.OverflowSignal {
+		}
+	}()
 
 	// Produce messages
 
@@ -632,4 +635,3 @@ MATCH:
 		t.Fatal(err)
 	}
 }
-
