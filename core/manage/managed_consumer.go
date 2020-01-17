@@ -442,7 +442,13 @@ func (m *ManagedConsumer) manage() {
 		}
 
 		m.unset()
+		oldConsumer := consumer
 		consumer = m.reconnect(false)
+		consumer.OverflowSignal = oldConsumer.OverflowSignal
+
+		oldConsumer.Omu.Lock()
+		consumer.Overflow = oldConsumer.Overflow
+		oldConsumer.Omu.Unlock()
 		m.set(consumer)
 	}
 }
