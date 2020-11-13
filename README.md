@@ -1,5 +1,9 @@
 # pulsar-client-go
 
+## 迁移说明
+
+该仓库停止更新，转移至`https://github.com/tuya/pulsar-client-go`
+
 =========
 
 A Go client library for the [Apache Pulsar](https://pulsar.incubator.apache.org/) project.
